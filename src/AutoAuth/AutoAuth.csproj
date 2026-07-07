@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <PackageId>Swevo.AutoAuth</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Justin Bannister</Authors>
+    <Copyright>Copyright (c) 2026 Justin Bannister</Copyright>
+    <Description>A free, MIT-licensed fluent configuration wrapper around OpenIddict for building OAuth2/OIDC token servers in ASP.NET Core — an alternative to Duende IdentityServer's revenue-based commercial license. AutoAuth does not implement any protocol or cryptographic logic itself; all token issuance, validation, and signing is delegated to OpenIddict (Apache 2.0).</Description>
+    <PackageTags>oauth2;oidc;openid-connect;openiddict;identityserver;authentication;authorization;dotnet;csharp;aspnetcore</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Swevo/AutoAuth</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Swevo/AutoAuth</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <PackageReleaseNotes>1.0.0: Initial release. Fluent AddAutoAuthServer/AddAutoAuthValidation configuration wrappers over OpenIddict, an idempotent client seeder (AutoAuthClientSeeder), and a ready-made client_credentials token endpoint (MapAutoAuthClientCredentialsEndpoint). Interactive flows (authorization_code with user login) require your own login/consent endpoint — see README.</PackageReleaseNotes>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Condition="Exists('..\..\README.md')" />
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="OpenIddict.AspNetCore" Version="7.5.*" />
+    <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="7.5.*" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.*" PrivateAssets="all">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="AutoAuth.Tests" />
+  </ItemGroup>
+</Project>

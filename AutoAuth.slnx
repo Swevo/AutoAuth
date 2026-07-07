@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AutoAuth/AutoAuth.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AutoAuth.Tests/AutoAuth.Tests.csproj" />
+  </Folder>
+</Solution>
