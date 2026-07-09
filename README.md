@@ -105,6 +105,7 @@ AutoAuth will map the `/connect/authorize` and `/connect/logout` endpoint URIs a
 - [AutoBus](https://github.com/Swevo/AutoBus) — free MassTransit alternative
 - [FluentPdf](https://github.com/Swevo/FluentPdf) — free QuestPDF alternative
 - [FluentExcel](https://github.com/Swevo/FluentExcel) — free EPPlus alternative
+- [AutoImage](https://github.com/Swevo/AutoImage) — free ImageSharp alternative
 
 ## License
 
