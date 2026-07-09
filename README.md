@@ -1,5 +1,10 @@
 # Swevo.AutoAuth
 
+[![NuGet](https://img.shields.io/nuget/v/Swevo.AutoAuth.svg)](https://www.nuget.org/packages/Swevo.AutoAuth)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/Swevo.AutoAuth.svg)](https://www.nuget.org/packages/Swevo.AutoAuth)
+[![CI](https://github.com/Swevo/AutoAuth/actions/workflows/build.yml/badge.svg)](https://github.com/Swevo/AutoAuth/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A free, MIT-licensed fluent configuration wrapper around [OpenIddict](https://github.com/openiddict/openiddict-core) (Apache 2.0) for building OAuth2/OIDC token servers in ASP.NET Core.
 
 **AutoAuth exists because [Duende IdentityServer](https://duendesoftware.com/) v6+ requires a paid commercial license for production use** once your organization crosses Duende's revenue/usage thresholds (see [duendesoftware.com/license](https://duendesoftware.com/license)). OpenIddict is a fully free, Apache 2.0-licensed alternative — but it is a low-level *protocol toolkit*, not a turnkey product: you must wire up its server/validation options and write your own token/authorization endpoint controllers by hand. AutoAuth removes the boilerplate from that wiring and ships one ready-to-use endpoint, while being explicit about what it does and does not do.
