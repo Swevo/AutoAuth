@@ -15,6 +15,7 @@ public sealed class AutoAuthServerOptions
     internal TimeSpan AccessTokenLifetime { get; private set; } = TimeSpan.FromMinutes(60);
     internal TimeSpan RefreshTokenLifetime { get; private set; } = TimeSpan.FromDays(14);
     internal TimeSpan AuthorizationCodeLifetime { get; private set; } = TimeSpan.FromMinutes(5);
+    internal bool RequirePushedAuthorizationRequestsValue { get; private set; }
     internal bool UseDevelopmentCertificatesValue { get; private set; }
     internal X509Certificate2? SigningCertificate { get; private set; }
     internal X509Certificate2? EncryptionCertificate { get; private set; }
@@ -55,6 +56,18 @@ public sealed class AutoAuthServerOptions
     public AutoAuthServerOptions RequireProofKeyForCodeExchange(bool value = true)
     {
         RequirePkce = value;
+        return this;
+    }
+
+    /// <summary>
+    /// Requires interactive authorization requests to be sent via Pushed Authorization Requests
+    /// (PAR, RFC 9126). When enabled, AutoAuth exposes OpenIddict's pushed authorization endpoint
+    /// at <c>/connect/par</c> and rejects front-channel authorization requests that don't use a
+    /// pushed request URI.
+    /// </summary>
+    public AutoAuthServerOptions RequirePushedAuthorizationRequests(bool value = true)
+    {
+        RequirePushedAuthorizationRequestsValue = value;
         return this;
     }
 

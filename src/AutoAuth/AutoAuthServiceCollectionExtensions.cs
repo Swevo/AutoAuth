@@ -38,6 +38,14 @@ public static class AutoAuthServiceCollectionExtensions
                 "AutoAuth requires at least one flow to be enabled (e.g. AllowClientCredentialsFlow()).");
         }
 
+        if (options.RequirePushedAuthorizationRequestsValue &&
+            !options.Flows.Contains(AutoAuthServerOptions.GrantType.AuthorizationCode))
+        {
+            throw new InvalidOperationException(
+                "AutoAuth can only require pushed authorization requests when AllowAuthorizationCodeFlow() " +
+                "is enabled, because PAR only applies to interactive authorization requests.");
+        }
+
         if (!options.UseDevelopmentCertificatesValue && options.SigningCertificate is null)
         {
             throw new InvalidOperationException(
@@ -70,6 +78,12 @@ public static class AutoAuthServiceCollectionExtensions
                 if (options.RequirePkce)
                 {
                     server.RequireProofKeyForCodeExchange();
+                }
+
+                if (options.RequirePushedAuthorizationRequestsValue)
+                {
+                    server.SetPushedAuthorizationEndpointUris("/connect/par");
+                    server.RequirePushedAuthorizationRequests();
                 }
 
                 server.SetTokenEndpointUris("/connect/token");

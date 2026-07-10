@@ -93,15 +93,31 @@ builder.Services.AddAutoAuthValidation(validation => validation
 builder.Services.AddAutoAuthServer<AppDbContext>(server => server
     .SetIssuer("https://auth.example.com/")
     .AllowAuthorizationCodeFlow()   // requires PKCE by default
+    .RequirePushedAuthorizationRequests()
     .AllowRefreshTokenFlow()
     .AddSigningCertificate(myCertificate));
 ```
 
 AutoAuth will map the `/connect/authorize` and `/connect/logout` endpoint URIs and enable ASP.NET Core passthrough for them, but **you must implement your own controller/endpoint** handling login, consent, and building the `ClaimsPrincipal` — see OpenIddict's `Velusia`/`Zirku` samples for a complete, working reference implementation of interactive flows.
 
+## Requiring PAR (Pushed Authorization Requests)
+
+```csharp
+builder.Services.AddAutoAuthServer<AppDbContext>(server => server
+    .SetIssuer("https://auth.example.com/")
+    .AllowAuthorizationCodeFlow()
+    .RequirePushedAuthorizationRequests()
+    .AddSigningCertificate(myCertificate));
+```
+
+For Duende IdentityServer users, this is the AutoAuth/OpenIddict equivalent of enabling **PAR** as an enterprise hardening feature for interactive clients. AutoAuth simply switches on OpenIddict's built-in PAR enforcement and exposes the pushed authorization endpoint at `/connect/par`; it does not implement any custom PAR protocol logic itself.
+
+Current limitation: PAR is only exposed through AutoAuth for interactive `authorization_code` setups, which matches the flows AutoAuth already configures. You still bring your own login/consent endpoint for `/connect/authorize`.
+
 ## Security notes
 
 - PKCE (`RequireProofKeyForCodeExchange`) is **required by default** for authorization_code requests.
+- `RequirePushedAuthorizationRequests()` forces interactive clients to send authorization requests through `/connect/par`, reducing sensitive request data in the browser front channel.
 - `UseDevelopmentCertificates()` uses OpenIddict's ephemeral signing/encryption certificates, regenerated on every restart. **Do not use in production** — tokens issued before a restart become unverifiable. Use `AddSigningCertificate(...)` with a real, persisted certificate instead.
 - AutoAuth throws at startup if no issuer, no flow, or no signing certificate (and no explicit development opt-in) is configured — misconfiguration fails fast rather than silently running insecurely.
 

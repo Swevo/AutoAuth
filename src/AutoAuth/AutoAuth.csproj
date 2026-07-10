@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 
     <PackageId>Swevo.AutoAuth</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <Authors>Justin Bannister</Authors>
     <Copyright>Copyright (c) 2026 Justin Bannister</Copyright>
     <Description>A free, MIT-licensed fluent configuration wrapper around OpenIddict for building OAuth2/OIDC token servers in ASP.NET Core — an alternative to Duende IdentityServer's revenue-based commercial license. AutoAuth does not implement any protocol or cryptographic logic itself; all token issuance, validation, and signing is delegated to OpenIddict (Apache 2.0).</Description>
@@ -23,7 +23,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
-    <PackageReleaseNotes>1.0.1: Add missing package icon. 1.0.0: Initial release. Fluent AddAutoAuthServer/AddAutoAuthValidation configuration wrappers over OpenIddict, an idempotent client seeder (AutoAuthClientSeeder), and a ready-made client_credentials token endpoint (MapAutoAuthClientCredentialsEndpoint). Interactive flows (authorization_code with user login) require your own login/consent endpoint — see README.</PackageReleaseNotes>
+    <PackageReleaseNotes>1.1.0: Add fluent RequirePushedAuthorizationRequests() support for OpenIddict PAR enforcement, exposing /connect/par for authorization_code deployments. 1.0.1: Add missing package icon. 1.0.0: Initial release. Fluent AddAutoAuthServer/AddAutoAuthValidation configuration wrappers over OpenIddict, an idempotent client seeder (AutoAuthClientSeeder), and a ready-made client_credentials token endpoint (MapAutoAuthClientCredentialsEndpoint). Interactive flows (authorization_code with user login) require your own login/consent endpoint — see README.</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" Condition="Exists('..\..\README.md')" />
