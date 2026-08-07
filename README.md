@@ -4,6 +4,7 @@
 [![NuGet Downloads](https://img.shields.io/nuget/dt/Swevo.AutoAuth.svg)](https://www.nuget.org/packages/Swevo.AutoAuth)
 [![CI](https://github.com/Swevo/AutoAuth/actions/workflows/build.yml/badge.svg)](https://github.com/Swevo/AutoAuth/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![.NET 10 Ready](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)](#)
 
 A free, MIT-licensed fluent configuration wrapper around [OpenIddict](https://github.com/openiddict/openiddict-core) (Apache 2.0) for building OAuth2/OIDC token servers in ASP.NET Core.
 
