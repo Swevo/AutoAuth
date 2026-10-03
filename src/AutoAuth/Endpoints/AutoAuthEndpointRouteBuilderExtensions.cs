@@ -128,6 +128,32 @@ public static class AutoAuthEndpointRouteBuilderExtensions
             identity.SetResources(resources);
             identity.SetDestinations(GetDestinations);
 
+            if (featureOptions.SessionManagementEnabled &&
+                sessionManager is IAutoAuthSessionRevocationStore revocationStore)
+            {
+                var subject = identity.GetClaim(Claims.Subject) ?? string.Empty;
+                var revoked = await revocationStore.IsRevokedAsync(subject, request.ClientId, httpContext.RequestAborted);
+                if (revoked)
+                {
+                    if (featureOptions.TelemetryEnabled)
+                    {
+                        AutoAuthTelemetry.TokenRejected.Add(1);
+                    }
+
+                    await auditSink.WriteAsync("autoauth.token.rejected.session_revoked", new
+                    {
+                        subject,
+                        clientId = request.ClientId
+                    }, httpContext.RequestAborted);
+
+                    return Results.BadRequest(new OpenIddictResponse
+                    {
+                        Error = Errors.AccessDenied,
+                        ErrorDescription = "Session has been revoked for this subject/client."
+                    });
+                }
+            }
+
             await auditSink.WriteAsync("autoauth.token.issued", new
             {
                 clientId = request.ClientId,

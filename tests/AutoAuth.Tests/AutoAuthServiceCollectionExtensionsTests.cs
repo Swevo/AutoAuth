@@ -239,4 +239,18 @@ public sealed class AutoAuthServiceCollectionExtensionsTests
         doc.RootElement.GetProperty("api_key").GetString().Should().Be("***REDACTED***");
         doc.RootElement.GetProperty("plain").GetString().Should().Be("ok");
     }
+
+    [Fact]
+    public async Task DefaultSessionManager_Supports_RevocationChecks()
+    {
+        var manager = new DefaultSessionManager();
+
+        await manager.RevokeAsync("subject-a", "client-a", default);
+
+        (await manager.IsRevokedAsync("subject-a", "client-a", default)).Should().BeTrue();
+        (await manager.IsRevokedAsync("subject-a", "client-b", default)).Should().BeFalse();
+
+        await manager.RevokeAsync("subject-b", null, default);
+        (await manager.IsRevokedAsync("subject-b", "any-client", default)).Should().BeTrue();
+    }
 }

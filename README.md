@@ -63,6 +63,14 @@ builder.Services.AddAutoAuthServer<AppDbContext>(server => server
 When key rotation is enabled, AutoAuth registers a hosted scheduler (`AutoAuthKeyRotationBackgroundService`).
 Implement and register `IAutoAuthKeyRotationHandler` to perform your real key rollover operation.
 
+Session revocation helper:
+
+```csharp
+await app.Services.RevokeAutoAuthSessionAsync(subject: "service-a", clientId: "service-a");
+```
+
+When session management is enabled, subsequent token requests for revoked subject/client pairs are rejected.
+
 ## Install
 
 ```bash

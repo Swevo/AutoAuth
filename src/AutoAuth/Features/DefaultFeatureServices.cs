@@ -59,14 +59,30 @@ internal sealed class DefaultAuditSink(AutoAuthFeatureOptions options) : IAutoAu
     }
 }
 
-internal sealed class DefaultSessionManager : IAutoAuthSessionManager
+internal sealed class DefaultSessionManager : IAutoAuthSessionManager, IAutoAuthSessionRevocationStore
 {
     public List<(string Subject, string ClientId, DateTimeOffset IssuedAtUtc)> IssuedTokens { get; } = [];
+    private readonly HashSet<string> _revoked = new(StringComparer.OrdinalIgnoreCase);
 
     public ValueTask RecordTokenIssuedAsync(string subject, string clientId, DateTimeOffset issuedAtUtc, CancellationToken cancellationToken)
     {
         IssuedTokens.Add((subject, clientId, issuedAtUtc));
         return ValueTask.CompletedTask;
+    }
+
+    public ValueTask RevokeAsync(string subject, string? clientId, CancellationToken cancellationToken)
+    {
+        var key = $"{subject}|{clientId ?? "*"}";
+        _revoked.Add(key);
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask<bool> IsRevokedAsync(string subject, string? clientId, CancellationToken cancellationToken)
+    {
+        var subjectWildcard = $"{subject}|*";
+        var exact = $"{subject}|{clientId ?? "*"}";
+        var revoked = _revoked.Contains(subjectWildcard) || _revoked.Contains(exact);
+        return ValueTask.FromResult(revoked);
     }
 }
 
