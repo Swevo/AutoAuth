@@ -67,6 +67,22 @@ public sealed class AutoAuthServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void AddAutoAuthServer_WithRevocationEndpoint_RegistersRevocationUri()
+    {
+        var services = new ServiceCollection();
+
+        services.AddAutoAuthServer<TestDbContext>(server => server
+            .SetIssuer("https://localhost/")
+            .AllowClientCredentialsFlow()
+            .EnableRevocationEndpoint()
+            .UseDevelopmentCertificates());
+
+        using var provider = services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<OpenIddictServerOptions>>().Value;
+        options.RevocationEndpointUris.Should().ContainSingle(uri => uri.OriginalString == "/connect/revocation");
+    }
+
+    [Fact]
     public void AddAutoAuthServer_WithRequiredParButWithoutAuthorizationCodeFlow_Throws()
     {
         var services = new ServiceCollection();

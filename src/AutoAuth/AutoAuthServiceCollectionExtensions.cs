@@ -102,6 +102,10 @@ public static class AutoAuthServiceCollectionExtensions
                 server.SetTokenEndpointUris("/connect/token");
                 server.SetUserInfoEndpointUris("/connect/userinfo");
                 server.SetEndSessionEndpointUris("/connect/logout");
+                if (options.EnableRevocationEndpointValue)
+                {
+                    server.SetRevocationEndpointUris("/connect/revocation");
+                }
 
                 server.SetAccessTokenLifetime(options.AccessTokenLifetime);
                 server.SetRefreshTokenLifetime(options.RefreshTokenLifetime);

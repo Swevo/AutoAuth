@@ -17,6 +17,7 @@ public sealed class AutoAuthServerOptions
     internal TimeSpan RefreshTokenLifetime { get; private set; } = TimeSpan.FromDays(14);
     internal TimeSpan AuthorizationCodeLifetime { get; private set; } = TimeSpan.FromMinutes(5);
     internal bool RequirePushedAuthorizationRequestsValue { get; private set; }
+    internal bool EnableRevocationEndpointValue { get; private set; }
     internal bool UseDevelopmentCertificatesValue { get; private set; }
     internal X509Certificate2? SigningCertificate { get; private set; }
     internal X509Certificate2? EncryptionCertificate { get; private set; }
@@ -70,6 +71,13 @@ public sealed class AutoAuthServerOptions
     public AutoAuthServerOptions RequirePushedAuthorizationRequests(bool value = true)
     {
         RequirePushedAuthorizationRequestsValue = value;
+        return this;
+    }
+
+    /// <summary>Enables OAuth2 token revocation endpoint at <c>/connect/revocation</c>.</summary>
+    public AutoAuthServerOptions EnableRevocationEndpoint(bool value = true)
+    {
+        EnableRevocationEndpointValue = value;
         return this;
     }
 

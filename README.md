@@ -94,6 +94,7 @@ builder.Services.AddAutoAuthServer<AppDbContext>(server => server
     .SetIssuer("https://auth.example.com/")
     .AllowClientCredentialsFlow()
     .AddSigningCertificate(myCertificate)      // or .UseDevelopmentCertificates() for local dev only
+    .EnableRevocationEndpoint()
     .SetAccessTokenLifetime(TimeSpan.FromMinutes(60)));
 
 var app = builder.Build();
@@ -129,6 +130,18 @@ builder.Services.AddAutoAuthValidation(validation => validation
     .SetIssuer("https://auth.example.com/")
     .UseLocalValidation()); // or .UseIntrospection(clientId, clientSecret)
 ```
+
+## Enabling token revocation endpoint
+
+```csharp
+builder.Services.AddAutoAuthServer<AppDbContext>(server => server
+    .SetIssuer("https://auth.example.com/")
+    .AllowClientCredentialsFlow()
+    .EnableRevocationEndpoint()
+    .AddSigningCertificate(myCertificate));
+```
+
+When enabled, AutoAuth configures OpenIddict's revocation endpoint at `POST /connect/revocation`.
 
 Define authorization policies with a fluent DSL:
 
