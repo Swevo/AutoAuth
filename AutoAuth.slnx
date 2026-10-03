@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/AutoAuth/AutoAuth.csproj" />
+    <Project Path="src/AutoAuth.Analyzers/AutoAuth.Analyzers.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/AutoAuth.Tests/AutoAuth.Tests.csproj" />
+    <Project Path="tests/AutoAuth.Analyzers.Tests/AutoAuth.Analyzers.Tests.csproj" />
   </Folder>
 </Solution>

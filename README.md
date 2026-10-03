@@ -68,6 +68,12 @@ Implement and register `IAutoAuthKeyRotationHandler` to perform your real key ro
 dotnet add package Swevo.AutoAuth
 ```
 
+For compile-time security guardrails:
+
+```bash
+dotnet add package Swevo.AutoAuth.Analyzers
+```
+
 ## Quick start: client_credentials (machine-to-machine)
 
 ```csharp
