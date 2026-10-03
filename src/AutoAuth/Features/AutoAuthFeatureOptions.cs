@@ -13,4 +13,6 @@ public sealed class AutoAuthFeatureOptions
     internal bool SessionManagementEnabled { get; set; }
     internal bool ComplianceAuditEnabled { get; set; }
     internal bool TelemetryEnabled { get; set; } = true;
+    internal string TenantHeaderName { get; set; } = "X-Tenant-Id";
+    internal HashSet<string> DeniedIpAddresses { get; } = new(StringComparer.OrdinalIgnoreCase);
 }

@@ -42,6 +42,22 @@ AutoAuth now includes first-class extension points for higher-level auth capabil
 
 These hooks let you layer SaaS multi-tenancy, adaptive risk controls, compliance logging, and session management without AutoAuth taking ownership of your identity UX.
 
+Example:
+
+```csharp
+builder.Services.AddAutoAuthServer<AppDbContext>(server => server
+    .SetIssuer("https://auth.example.com/")
+    .AllowClientCredentialsFlow()
+    .EnableMultiTenantIsolation()
+    .UseTenantHeader("X-Tenant-Id")
+    .EnableRiskBasedAuthentication()
+    .DenyIpAddresses("203.0.113.15")
+    .EnableComplianceAudit()
+    .EnableSessionManagement()
+    .EnableTelemetry()
+    .UseDevelopmentCertificates());
+```
+
 ## Install
 
 ```bash

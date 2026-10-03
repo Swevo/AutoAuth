@@ -57,8 +57,8 @@ public static class AutoAuthServiceCollectionExtensions
         services.AddSingleton(options.FeatureOptions);
         services.AddSingleton<IAutoAuthTenantResolver, DefaultTenantResolver>();
         services.AddSingleton<IAutoAuthRiskEvaluator, DefaultRiskEvaluator>();
-        services.AddSingleton<IAutoAuthAuditSink, NullAuditSink>();
-        services.AddSingleton<IAutoAuthSessionManager, NullSessionManager>();
+        services.AddSingleton<IAutoAuthAuditSink, DefaultAuditSink>();
+        services.AddSingleton<IAutoAuthSessionManager, DefaultSessionManager>();
 
         services.AddOpenIddict()
             .AddCore(core => core.UseEntityFrameworkCore().UseDbContext<TContext>())

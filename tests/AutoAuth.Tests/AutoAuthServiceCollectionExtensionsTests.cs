@@ -1,5 +1,6 @@
 using FluentAssertions;
 using AutoAuth.Features;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenIddict.Server;
@@ -132,5 +133,48 @@ public sealed class AutoAuthServiceCollectionExtensionsTests
         options.KeyRotationEnabled.Should().BeTrue();
         options.KeyRotationInterval.Should().Be(TimeSpan.FromHours(12));
         options.TelemetryEnabled.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task DefaultTenantResolver_Resolves_Header_When_MultiTenantEnabled()
+    {
+        var services = new ServiceCollection();
+
+        services.AddAutoAuthServer<TestDbContext>(server => server
+            .SetIssuer("https://localhost/")
+            .AllowClientCredentialsFlow()
+            .EnableMultiTenantIsolation()
+            .UseTenantHeader("X-Tenant")
+            .UseDevelopmentCertificates());
+
+        using var provider = services.BuildServiceProvider();
+        var resolver = provider.GetRequiredService<IAutoAuthTenantResolver>();
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers["X-Tenant"] = "tenant-a";
+
+        var tenant = await resolver.ResolveTenantAsync(httpContext, default);
+        tenant.Should().Be("tenant-a");
+    }
+
+    [Fact]
+    public async Task DefaultRiskEvaluator_Denies_Configured_Ip()
+    {
+        var services = new ServiceCollection();
+
+        services.AddAutoAuthServer<TestDbContext>(server => server
+            .SetIssuer("https://localhost/")
+            .AllowClientCredentialsFlow()
+            .EnableRiskBasedAuthentication()
+            .DenyIpAddresses("203.0.113.15")
+            .UseDevelopmentCertificates());
+
+        using var provider = services.BuildServiceProvider();
+        var evaluator = provider.GetRequiredService<IAutoAuthRiskEvaluator>();
+        var httpContext = new DefaultHttpContext();
+        httpContext.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("203.0.113.15");
+
+        var result = await evaluator.EvaluateAsync(httpContext, new OpenIddict.Abstractions.OpenIddictRequest(), default);
+        result.Allowed.Should().BeFalse();
+        result.Reason.Should().Contain("203.0.113.15");
     }
 }

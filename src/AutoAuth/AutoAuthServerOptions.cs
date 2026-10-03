@@ -137,6 +137,14 @@ public sealed class AutoAuthServerOptions
         return this;
     }
 
+    /// <summary>Specifies which request header contains the tenant identifier when multi-tenant mode is enabled.</summary>
+    public AutoAuthServerOptions UseTenantHeader(string headerName = "X-Tenant-Id")
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(headerName);
+        FeatureOptions.TenantHeaderName = headerName;
+        return this;
+    }
+
     /// <summary>Enables signing-key rotation metadata for hosting environments that rotate keys externally.</summary>
     public AutoAuthServerOptions EnableKeyRotation(TimeSpan interval)
     {
@@ -154,6 +162,21 @@ public sealed class AutoAuthServerOptions
     public AutoAuthServerOptions EnableRiskBasedAuthentication(bool value = true)
     {
         FeatureOptions.RiskBasedAuthenticationEnabled = value;
+        return this;
+    }
+
+    /// <summary>Blocks token requests coming from specific IP addresses when risk-based auth is enabled.</summary>
+    public AutoAuthServerOptions DenyIpAddresses(params string[] ipAddresses)
+    {
+        ArgumentNullException.ThrowIfNull(ipAddresses);
+        foreach (var ip in ipAddresses)
+        {
+            if (!string.IsNullOrWhiteSpace(ip))
+            {
+                FeatureOptions.DeniedIpAddresses.Add(ip.Trim());
+            }
+        }
+
         return this;
     }
 
