@@ -130,6 +130,18 @@ builder.Services.AddAutoAuthValidation(validation => validation
     .UseLocalValidation()); // or .UseIntrospection(clientId, clientSecret)
 ```
 
+Define authorization policies with a fluent DSL:
+
+```csharp
+using AutoAuth.Authorization;
+
+builder.Services.AddAutoAuthPolicies(policies => policies
+    .RequireScope("api.read", "api.read")
+    .RequireAnyScope("api.read-or-write", "api.read", "api.write")
+    .RequireRole("admins", "admin")
+    .RequireClaim("region.eu", "region", "eu"));
+```
+
 ## Enabling authorization_code (bring your own login/consent controller)
 
 ```csharp
