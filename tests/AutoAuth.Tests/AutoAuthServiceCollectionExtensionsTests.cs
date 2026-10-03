@@ -2,6 +2,7 @@ using FluentAssertions;
 using AutoAuth.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using OpenIddict.Server;
 using Xunit;
@@ -176,5 +177,21 @@ public sealed class AutoAuthServiceCollectionExtensionsTests
         var result = await evaluator.EvaluateAsync(httpContext, new OpenIddict.Abstractions.OpenIddictRequest(), default);
         result.Allowed.Should().BeFalse();
         result.Reason.Should().Contain("203.0.113.15");
+    }
+
+    [Fact]
+    public void AddAutoAuthServer_WithKeyRotation_RegistersHostedService()
+    {
+        var services = new ServiceCollection();
+
+        services.AddAutoAuthServer<TestDbContext>(server => server
+            .SetIssuer("https://localhost/")
+            .AllowClientCredentialsFlow()
+            .EnableKeyRotation(TimeSpan.FromMinutes(30))
+            .UseDevelopmentCertificates());
+
+        using var provider = services.BuildServiceProvider();
+        var hostedServices = provider.GetServices<IHostedService>();
+        hostedServices.Should().Contain(s => s.GetType().Name.Contains("AutoAuthKeyRotationBackgroundService"));
     }
 }

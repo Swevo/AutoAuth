@@ -65,3 +65,8 @@ internal sealed class DefaultSessionManager : IAutoAuthSessionManager
         return ValueTask.CompletedTask;
     }
 }
+
+internal sealed class NullKeyRotationHandler : IAutoAuthKeyRotationHandler
+{
+    public ValueTask RotateAsync(CancellationToken cancellationToken) => ValueTask.CompletedTask;
+}

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using AutoAuth.Features;
 
 namespace AutoAuth;
@@ -59,6 +60,11 @@ public static class AutoAuthServiceCollectionExtensions
         services.AddSingleton<IAutoAuthRiskEvaluator, DefaultRiskEvaluator>();
         services.AddSingleton<IAutoAuthAuditSink, DefaultAuditSink>();
         services.AddSingleton<IAutoAuthSessionManager, DefaultSessionManager>();
+        services.TryAddSingleton<IAutoAuthKeyRotationHandler, NullKeyRotationHandler>();
+        if (options.FeatureOptions.KeyRotationEnabled)
+        {
+            services.AddHostedService<AutoAuthKeyRotationBackgroundService>();
+        }
 
         services.AddOpenIddict()
             .AddCore(core => core.UseEntityFrameworkCore().UseDbContext<TContext>())

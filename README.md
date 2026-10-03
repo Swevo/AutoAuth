@@ -55,8 +55,12 @@ builder.Services.AddAutoAuthServer<AppDbContext>(server => server
     .EnableComplianceAudit()
     .EnableSessionManagement()
     .EnableTelemetry()
+    .EnableKeyRotation(TimeSpan.FromHours(12))
     .UseDevelopmentCertificates());
 ```
+
+When key rotation is enabled, AutoAuth registers a hosted scheduler (`AutoAuthKeyRotationBackgroundService`).
+Implement and register `IAutoAuthKeyRotationHandler` to perform your real key rollover operation.
 
 ## Install
 
