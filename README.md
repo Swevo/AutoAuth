@@ -53,6 +53,7 @@ builder.Services.AddAutoAuthServer<AppDbContext>(server => server
     .EnableRiskBasedAuthentication()
     .DenyIpAddresses("203.0.113.15")
     .EnableComplianceAudit()
+    .AddRedactedAuditFields("api_key", "authorization")
     .EnableSessionManagement()
     .EnableTelemetry()
     .EnableKeyRotation(TimeSpan.FromHours(12))

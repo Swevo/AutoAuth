@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using OpenIddict.Server;
+using System.Text.Json;
 using Xunit;
 
 namespace AutoAuth.Tests;
@@ -209,5 +210,33 @@ public sealed class AutoAuthServiceCollectionExtensionsTests
         using var provider = services.BuildServiceProvider();
         var hostedServices = provider.GetServices<IHostedService>();
         hostedServices.Should().Contain(s => s.GetType().Name.Contains("AutoAuthKeyRotationBackgroundService"));
+    }
+
+    [Fact]
+    public async Task DefaultAuditSink_Redacts_ConfiguredSensitiveFields()
+    {
+        var services = new ServiceCollection();
+
+        services.AddAutoAuthServer<TestDbContext>(server => server
+            .SetIssuer("https://localhost/")
+            .AllowClientCredentialsFlow()
+            .EnableComplianceAudit()
+            .AddRedactedAuditFields("api_key")
+            .UseDevelopmentCertificates());
+
+        using var provider = services.BuildServiceProvider();
+        var sink = (DefaultAuditSink)provider.GetRequiredService<IAutoAuthAuditSink>();
+        await sink.WriteAsync("test", new
+        {
+            client_secret = "secret-value",
+            api_key = "my-key",
+            plain = "ok"
+        }, default);
+
+        var payload = sink.Events.Single().JsonPayload;
+        using var doc = JsonDocument.Parse(payload);
+        doc.RootElement.GetProperty("client_secret").GetString().Should().Be("***REDACTED***");
+        doc.RootElement.GetProperty("api_key").GetString().Should().Be("***REDACTED***");
+        doc.RootElement.GetProperty("plain").GetString().Should().Be("ok");
     }
 }

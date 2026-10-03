@@ -202,6 +202,21 @@ public sealed class AutoAuthServerOptions
         return this;
     }
 
+    /// <summary>Adds additional case-insensitive field names to redact in compliance audit payloads.</summary>
+    public AutoAuthServerOptions AddRedactedAuditFields(params string[] fieldNames)
+    {
+        ArgumentNullException.ThrowIfNull(fieldNames);
+        foreach (var fieldName in fieldNames)
+        {
+            if (!string.IsNullOrWhiteSpace(fieldName))
+            {
+                FeatureOptions.RedactedFieldNames.Add(fieldName.Trim());
+            }
+        }
+
+        return this;
+    }
+
     /// <summary>Enables OpenTelemetry activity/metrics around built-in endpoints.</summary>
     public AutoAuthServerOptions EnableTelemetry(bool value = true)
     {

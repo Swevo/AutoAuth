@@ -44,13 +44,17 @@ internal sealed class DefaultRiskEvaluator(AutoAuthFeatureOptions options) : IAu
     }
 }
 
-internal sealed class DefaultAuditSink : IAutoAuthAuditSink
+internal sealed class DefaultAuditSink(AutoAuthFeatureOptions options) : IAutoAuthAuditSink
 {
-    public List<(string EventType, object Payload, DateTimeOffset OccurredAtUtc)> Events { get; } = [];
+    public List<(string EventType, string JsonPayload, DateTimeOffset OccurredAtUtc)> Events { get; } = [];
 
     public ValueTask WriteAsync(string eventType, object payload, CancellationToken cancellationToken)
     {
-        Events.Add((eventType, payload, DateTimeOffset.UtcNow));
+        var jsonPayload = options.ComplianceAuditEnabled
+            ? AutoAuthAuditRedactor.RedactToJson(payload, options.RedactedFieldNames)
+            : System.Text.Json.JsonSerializer.Serialize(payload);
+
+        Events.Add((eventType, jsonPayload, DateTimeOffset.UtcNow));
         return ValueTask.CompletedTask;
     }
 }

@@ -15,4 +15,12 @@ public sealed class AutoAuthFeatureOptions
     internal bool TelemetryEnabled { get; set; } = true;
     internal string TenantHeaderName { get; set; } = "X-Tenant-Id";
     internal HashSet<string> DeniedIpAddresses { get; } = new(StringComparer.OrdinalIgnoreCase);
+    internal HashSet<string> RedactedFieldNames { get; } = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "client_secret",
+        "refresh_token",
+        "access_token",
+        "password",
+        "token"
+    };
 }
