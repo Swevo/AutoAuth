@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using AutoAuth.Features;
 
 namespace AutoAuth;
 
@@ -52,6 +53,12 @@ public static class AutoAuthServiceCollectionExtensions
                 "AutoAuth requires a signing certificate. Call AddSigningCertificate(certificate) for " +
                 "production, or UseDevelopmentCertificates() for local development/testing only.");
         }
+
+        services.AddSingleton(options.FeatureOptions);
+        services.AddSingleton<IAutoAuthTenantResolver, DefaultTenantResolver>();
+        services.AddSingleton<IAutoAuthRiskEvaluator, DefaultRiskEvaluator>();
+        services.AddSingleton<IAutoAuthAuditSink, NullAuditSink>();
+        services.AddSingleton<IAutoAuthSessionManager, NullSessionManager>();
 
         services.AddOpenIddict()
             .AddCore(core => core.UseEntityFrameworkCore().UseDbContext<TContext>())

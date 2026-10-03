@@ -1,4 +1,5 @@
 using FluentAssertions;
+using AutoAuth.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenIddict.Server;
@@ -85,5 +86,51 @@ public sealed class AutoAuthServiceCollectionExtensionsTests
         var act = () => services.AddAutoAuthValidation(validation => validation.UseLocalValidation());
 
         act.Should().Throw<InvalidOperationException>().WithMessage("*SetIssuer*");
+    }
+
+    [Fact]
+    public void AddAutoAuthServer_Registers_DefaultFeatureServices()
+    {
+        var services = new ServiceCollection();
+
+        services.AddAutoAuthServer<TestDbContext>(server => server
+            .SetIssuer("https://localhost/")
+            .AllowClientCredentialsFlow()
+            .UseDevelopmentCertificates());
+
+        using var provider = services.BuildServiceProvider();
+        provider.GetRequiredService<IAutoAuthTenantResolver>().Should().NotBeNull();
+        provider.GetRequiredService<IAutoAuthRiskEvaluator>().Should().NotBeNull();
+        provider.GetRequiredService<IAutoAuthAuditSink>().Should().NotBeNull();
+        provider.GetRequiredService<IAutoAuthSessionManager>().Should().NotBeNull();
+    }
+
+    [Fact]
+    public void AddAutoAuthServer_FeatureFlags_AreCaptured()
+    {
+        var services = new ServiceCollection();
+
+        services.AddAutoAuthServer<TestDbContext>(server => server
+            .SetIssuer("https://localhost/")
+            .AllowClientCredentialsFlow()
+            .EnablePasskeys()
+            .EnableMultiTenantIsolation()
+            .EnableRiskBasedAuthentication()
+            .EnableSessionManagement()
+            .EnableComplianceAudit()
+            .EnableKeyRotation(TimeSpan.FromHours(12))
+            .EnableTelemetry()
+            .UseDevelopmentCertificates());
+
+        using var provider = services.BuildServiceProvider();
+        var options = provider.GetRequiredService<AutoAuthFeatureOptions>();
+        options.PasskeysEnabled.Should().BeTrue();
+        options.MultiTenantEnabled.Should().BeTrue();
+        options.RiskBasedAuthenticationEnabled.Should().BeTrue();
+        options.SessionManagementEnabled.Should().BeTrue();
+        options.ComplianceAuditEnabled.Should().BeTrue();
+        options.KeyRotationEnabled.Should().BeTrue();
+        options.KeyRotationInterval.Should().Be(TimeSpan.FromHours(12));
+        options.TelemetryEnabled.Should().BeTrue();
     }
 }

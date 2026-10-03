@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.IdentityModel.Tokens;
+using AutoAuth.Features;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
@@ -32,13 +33,34 @@ public static class AutoAuthEndpointRouteBuilderExtensions
         endpoints.MapPost(pattern, async (
             HttpContext httpContext,
             IOpenIddictApplicationManager applicationManager,
-            IOpenIddictScopeManager scopeManager) =>
+            IOpenIddictScopeManager scopeManager,
+            AutoAuthFeatureOptions featureOptions,
+            IAutoAuthTenantResolver tenantResolver,
+            IAutoAuthRiskEvaluator riskEvaluator,
+            IAutoAuthAuditSink auditSink,
+            IAutoAuthSessionManager sessionManager) =>
         {
+            if (featureOptions.TelemetryEnabled)
+            {
+                AutoAuthTelemetry.TokenRequests.Add(1);
+            }
+
             var request = httpContext.GetOpenIddictServerRequest() ??
                 throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
 
+            using var activity = featureOptions.TelemetryEnabled
+                ? AutoAuthTelemetry.ActivitySource.StartActivity("autoauth.token.request")
+                : null;
+            activity?.SetTag("grant_type", request.GrantType);
+            activity?.SetTag("client_id", request.ClientId);
+
             if (!request.IsClientCredentialsGrantType())
             {
+                if (featureOptions.TelemetryEnabled)
+                {
+                    AutoAuthTelemetry.TokenRejected.Add(1);
+                }
+
                 return Results.BadRequest(new OpenIddictResponse
                 {
                     Error = Errors.UnsupportedGrantType,
@@ -46,6 +68,38 @@ public static class AutoAuthEndpointRouteBuilderExtensions
                         "For other grant types (e.g. authorization_code), implement your own token " +
                         "endpoint — see the AutoAuth README for guidance.",
                 });
+            }
+
+            var tenantId = await tenantResolver.ResolveTenantAsync(httpContext, httpContext.RequestAborted);
+            if (!string.IsNullOrWhiteSpace(tenantId))
+            {
+                activity?.SetTag("tenant", tenantId);
+            }
+
+            if (featureOptions.RiskBasedAuthenticationEnabled)
+            {
+                var riskDecision = await riskEvaluator.EvaluateAsync(httpContext, request, httpContext.RequestAborted);
+                if (!riskDecision.Allowed)
+                {
+                    if (featureOptions.TelemetryEnabled)
+                    {
+                        AutoAuthTelemetry.TokenRejected.Add(1);
+                    }
+
+                    await auditSink.WriteAsync("autoauth.token.rejected.risk", new
+                    {
+                        clientId = request.ClientId,
+                        grantType = request.GrantType,
+                        tenantId,
+                        reason = riskDecision.Reason
+                    }, httpContext.RequestAborted);
+
+                    return Results.BadRequest(new OpenIddictResponse
+                    {
+                        Error = Errors.AccessDenied,
+                        ErrorDescription = riskDecision.Reason ?? "Token request rejected by risk policy."
+                    });
+                }
             }
 
             // Note: the client credentials are automatically validated by OpenIddict:
@@ -73,6 +127,25 @@ public static class AutoAuthEndpointRouteBuilderExtensions
             }
             identity.SetResources(resources);
             identity.SetDestinations(GetDestinations);
+
+            await auditSink.WriteAsync("autoauth.token.issued", new
+            {
+                clientId = request.ClientId,
+                grantType = request.GrantType,
+                tenantId,
+                scopes = identity.GetScopes().ToArray()
+            }, httpContext.RequestAborted);
+
+            await sessionManager.RecordTokenIssuedAsync(
+                identity.GetClaim(Claims.Subject) ?? string.Empty,
+                request.ClientId ?? string.Empty,
+                DateTimeOffset.UtcNow,
+                httpContext.RequestAborted);
+
+            if (featureOptions.TelemetryEnabled)
+            {
+                AutoAuthTelemetry.TokenIssued.Add(1);
+            }
 
             return Results.SignIn(new ClaimsPrincipal(identity), authenticationScheme: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         });

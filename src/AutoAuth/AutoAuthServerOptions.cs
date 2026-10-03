@@ -1,4 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
+using AutoAuth.Features;
 
 namespace AutoAuth;
 
@@ -19,6 +20,7 @@ public sealed class AutoAuthServerOptions
     internal bool UseDevelopmentCertificatesValue { get; private set; }
     internal X509Certificate2? SigningCertificate { get; private set; }
     internal X509Certificate2? EncryptionCertificate { get; private set; }
+    internal AutoAuthFeatureOptions FeatureOptions { get; } = new();
 
     /// <summary>Sets the server's canonical issuer URI (required). Must match what clients are configured to expect.</summary>
     public AutoAuthServerOptions SetIssuer(string issuerUri)
@@ -118,6 +120,61 @@ public sealed class AutoAuthServerOptions
     public AutoAuthServerOptions UseDevelopmentCertificates()
     {
         UseDevelopmentCertificatesValue = true;
+        return this;
+    }
+
+    /// <summary>Enables passkey/WebAuthn integration hooks.</summary>
+    public AutoAuthServerOptions EnablePasskeys(bool value = true)
+    {
+        FeatureOptions.PasskeysEnabled = value;
+        return this;
+    }
+
+    /// <summary>Enables multi-tenant resolver hooks for per-tenant auth behavior.</summary>
+    public AutoAuthServerOptions EnableMultiTenantIsolation(bool value = true)
+    {
+        FeatureOptions.MultiTenantEnabled = value;
+        return this;
+    }
+
+    /// <summary>Enables signing-key rotation metadata for hosting environments that rotate keys externally.</summary>
+    public AutoAuthServerOptions EnableKeyRotation(TimeSpan interval)
+    {
+        if (interval <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(interval), "Interval must be greater than zero.");
+        }
+
+        FeatureOptions.KeyRotationEnabled = true;
+        FeatureOptions.KeyRotationInterval = interval;
+        return this;
+    }
+
+    /// <summary>Enables risk-based token request evaluation hooks.</summary>
+    public AutoAuthServerOptions EnableRiskBasedAuthentication(bool value = true)
+    {
+        FeatureOptions.RiskBasedAuthenticationEnabled = value;
+        return this;
+    }
+
+    /// <summary>Enables token session lifecycle hook registration.</summary>
+    public AutoAuthServerOptions EnableSessionManagement(bool value = true)
+    {
+        FeatureOptions.SessionManagementEnabled = value;
+        return this;
+    }
+
+    /// <summary>Enables compliance audit hooks for auth events.</summary>
+    public AutoAuthServerOptions EnableComplianceAudit(bool value = true)
+    {
+        FeatureOptions.ComplianceAuditEnabled = value;
+        return this;
+    }
+
+    /// <summary>Enables OpenTelemetry activity/metrics around built-in endpoints.</summary>
+    public AutoAuthServerOptions EnableTelemetry(bool value = true)
+    {
+        FeatureOptions.TelemetryEnabled = value;
         return this;
     }
 

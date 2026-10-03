@@ -26,6 +26,22 @@ AutoAuth is a **thin, fluent configuration and client-seeding layer**. It contai
 
 If you need a complete, ready-made interactive login/consent experience out of the box, OpenIddict's samples repo or Duende IdentityServer's commercial UI remain your best options. AutoAuth's job is to remove the *configuration* boilerplate, not to replace security-critical UI code you haven't reviewed yourself.
 
+## Advanced extensibility hooks (1.2.0)
+
+AutoAuth now includes first-class extension points for higher-level auth capabilities while keeping protocol/crypto responsibility in OpenIddict:
+
+- **Passkeys/WebAuthn feature flag**: `EnablePasskeys()`
+- **Multi-tenant isolation hook**: `EnableMultiTenantIsolation()` + `IAutoAuthTenantResolver`
+- **Risk-based token policy hook**: `EnableRiskBasedAuthentication()` + `IAutoAuthRiskEvaluator`
+- **Session lifecycle hook**: `EnableSessionManagement()` + `IAutoAuthSessionManager`
+- **Compliance/audit hook**: `EnableComplianceAudit()` + `IAutoAuthAuditSink`
+- **Operational telemetry**: `EnableTelemetry()` emits `ActivitySource("Swevo.AutoAuth")` and counters:
+  - `autoauth.token.requests`
+  - `autoauth.token.issued`
+  - `autoauth.token.rejected`
+
+These hooks let you layer SaaS multi-tenancy, adaptive risk controls, compliance logging, and session management without AutoAuth taking ownership of your identity UX.
+
 ## Install
 
 ```bash
